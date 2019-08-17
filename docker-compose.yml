@@ -1,0 +1,8 @@
+version: '2.1'
+
+services:
+  golang-azure:
+    image: golang-azure
+    build: .
+    ports:
+      - 8000:8000
