@@ -37,6 +37,7 @@ func getVMClient() compute.VirtualMachinesClient {
 
 func GetAzureVMs(w http.ResponseWriter, r *http.Request) {
 	vmClient := getVMClient()
+	enableCors(&w)
 	//vms, err := vmClient.ListAll(ctx)
 	var azurevmlist models.AzureVMList
 
@@ -66,6 +67,10 @@ func GetAzureVMs_v2(w http.ResponseWriter, r *http.Request) {
 	}
 
 	json.NewEncoder(w).Encode((vmList.Response()))
+}
+
+func enableCors(w *http.ResponseWriter) {
+	(*w).Header().Set("Access-Control-Allow-Origin", "*")
 }
 
 func main() {
