@@ -35,6 +35,8 @@ func getVMClient() compute.VirtualMachinesClient {
 	return vmClient
 }
 
+// GetAzureVMs ...
+// Get azure vm list , returning mv name and vm ID
 func GetAzureVMs(w http.ResponseWriter, r *http.Request) {
 	vmClient := getVMClient()
 	enableCors(&w)
@@ -57,7 +59,30 @@ func GetAzureVMs(w http.ResponseWriter, r *http.Request) {
 	//}
 }
 
-func GetAzureVMs_v2(w http.ResponseWriter, r *http.Request) {
+// GetAzureVM ...
+// Get specific VM in specific resourcegroup
+func GetAzureVM(w http.ResponseWriter, r *http.Request) {
+	var azurevm models.AzureVM
+	vmClient := getVMClient()
+	enableCors(&w)
+
+	// get query parameters rgname and vmname
+	vars := mux.Vars(r)
+
+	rgname := vars["rgname"]
+	vmname := vars["vmname"]
+
+	// get specific VM info
+	vm, _ := vmClient.Get(ctx,rgname,vmname, compute.InstanceView)
+
+	azurevm.Name = *vm.Name
+	azurevm.VMID = *vm.VMID
+	json.NewEncoder(w).Encode(azurevm)
+}
+
+// GetAzureVMsV2 ...
+// get complete property list of VMs
+func GetAzureVMsV2(w http.ResponseWriter, r *http.Request) {
 	vmClient := getVMClient()
 	vmList, err := vmClient.ListAllComplete(ctx)
 
@@ -78,8 +103,12 @@ func main() {
 
 	if err == nil {
 		router := mux.NewRouter()
-		router.HandleFunc("/getazurevms", GetAzureVMs).Methods("GET")
-		router.HandleFunc("/getazurevms_v2", GetAzureVMs_v2).Methods("GET")
+		router.HandleFunc("/getazurevms", GetAzureVMs).Methods(http.MethodGet,http.MethodOptions)
+		router.HandleFunc("/getazurevmsV2", GetAzureVMsV2).Methods(http.MethodGet,http.MethodOptions)
+		router.HandleFunc("/getazurevm",GetAzureVM).
+			Methods(http.MethodGet,http.MethodOptions).
+			Queries("rgname","{rgname}","vmname","{vmname}")
+		router.Use(mux.CORSMethodMiddleware(router))
 		log.Fatal(http.ListenAndServe(":8000", router))
 	}
 
