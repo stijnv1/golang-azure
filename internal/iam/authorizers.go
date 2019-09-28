@@ -10,7 +10,7 @@ import (
 	"net/url"
 	"strings"
 
-	"github.com/stijnv1/golang-azure/internal/config"
+	"golang-azure/internal/config"
 
 	"github.com/Azure/go-autorest/autorest"
 	"github.com/Azure/go-autorest/autorest/adal"

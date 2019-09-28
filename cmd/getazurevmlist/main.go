@@ -7,11 +7,13 @@ import (
 	"log"
 	"net/http"
 
+	"golang-azure/internal/config"
+	"golang-azure/internal/iam"
+
+	"golang-azure/models"
+
 	"github.com/Azure/azure-sdk-for-go/services/compute/mgmt/2018-06-01/compute"
 	"github.com/gorilla/mux"
-	"github.com/stijnv1/golang-azure/internal/config"
-	"github.com/stijnv1/golang-azure/internal/iam"
-	"github.com/stijnv1/golang-azure/models"
 )
 
 var (
@@ -73,7 +75,7 @@ func GetAzureVM(w http.ResponseWriter, r *http.Request) {
 	vmname := vars["vmname"]
 
 	// get specific VM info
-	vm, _ := vmClient.Get(ctx,rgname,vmname, compute.InstanceView)
+	vm, _ := vmClient.Get(ctx, rgname, vmname, compute.InstanceView)
 
 	azurevm.Name = *vm.Name
 	azurevm.VMID = *vm.VMID
@@ -103,11 +105,11 @@ func main() {
 
 	if err == nil {
 		router := mux.NewRouter()
-		router.HandleFunc("/getazurevms", GetAzureVMs).Methods(http.MethodGet,http.MethodOptions)
-		router.HandleFunc("/getazurevmsV2", GetAzureVMsV2).Methods(http.MethodGet,http.MethodOptions)
-		router.HandleFunc("/getazurevm",GetAzureVM).
-			Methods(http.MethodGet,http.MethodOptions).
-			Queries("rgname","{rgname}","vmname","{vmname}")
+		router.HandleFunc("/getazurevms", GetAzureVMs).Methods(http.MethodGet, http.MethodOptions)
+		router.HandleFunc("/getazurevmsV2", GetAzureVMsV2).Methods(http.MethodGet, http.MethodOptions)
+		router.HandleFunc("/getazurevm", GetAzureVM).
+			Methods(http.MethodGet, http.MethodOptions).
+			Queries("rgname", "{rgname}", "vmname", "{vmname}")
 		router.Use(mux.CORSMethodMiddleware(router))
 		log.Fatal(http.ListenAndServe(":8000", router))
 	}
